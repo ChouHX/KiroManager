@@ -23,18 +23,6 @@ body {
 ::-webkit-scrollbar-thumb { background: #1e2a3e; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #2e3f58; }
 
-/* 顶部渐变装饰线 */
-.top-accent {
-  height: 2px;
-  background: linear-gradient(90deg, #4f8ff7, #a855f7, #ec4899, #4f8ff7);
-  background-size: 300% 100%;
-  animation: gradient-shift 8s ease infinite;
-}
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
 /* 导航按钮 */
 .nav-btn {
   color: #6b7a94;
@@ -81,22 +69,12 @@ body {
   position: relative;
   overflow: hidden;
 }
-.account-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--color-accent), #a855f7);
-  opacity: 0;
-  transition: opacity .2s;
-}
 .account-card:hover {
   background: var(--color-card-hover);
   border-color: var(--color-border-light);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(79,143,247,0.1);
   transform: translateY(-1px);
 }
-.account-card:hover::before { opacity: 1; }
 
 /* 卡片状态指示条 (左侧) */
 .card-status-bar {
