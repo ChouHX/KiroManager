@@ -75,8 +75,8 @@ function cardHtml(a) {
         <div><span class="info-label">登录</span> <span class="info-value">${a.provider || '—'}</span></div>
         <div><span class="info-label">认证</span> <span class="info-value">${a.auth_method || '—'}</span></div>
         <div><span class="info-label">用量</span> <span class="info-value">${usage}</span></div>
+        <div><span class="info-label">超额</span> <span class="info-value ${a.overage_status === 'ENABLED' ? 'text-yellow-400' : ''}">${a.overage_status === 'ENABLED' ? '已开启' : '未开启'}</span></div>
         <div class="col-span-2"><span class="info-label">过期</span> <span class="info-value font-mono">${a.expires_at || '—'}</span></div>
-        <div><span class="info-label">区域</span> <span class="info-value">${a.region || '—'}</span></div>
       </div>
       <div class="flex items-center gap-1.5 border-t border-border pt-2">
         <button class="card-btn inline-flex items-center gap-1" onclick="refreshOne(${a.id})">${icons.refreshCw} 刷新</button>
