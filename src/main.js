@@ -91,9 +91,6 @@ function cardHtml(a) {
 
 // ─── 单卡片操作 ─────────────────────────────────────────────────────────
 async function refreshOne(id) {
-  toast('刷新中...', 'info');
-// ─── 单卡片操作 ─────────────────────────────────────────────────────────
-async function refreshOne(id) {
   showLoading('刷新中...');
   try {
     const logs = await invoke('refresh_accounts', { ids: [id] });
@@ -119,7 +116,6 @@ async function deleteOne(id) {
   } catch (e) { toast('删除失败: ' + e, 'err'); }
 }
 
-// ─── 全局操作 ───────────────────────────────────────────────────────────
 async function enableOverageOne(id) {
   showLoading('启用超额...');
   try {
@@ -130,6 +126,7 @@ async function enableOverageOne(id) {
   hideLoading();
 }
 
+// ─── 全局操作 ───────────────────────────────────────────────────────────
 async function enableOverageAll() {
   if (accounts.length === 0) { toast('无账号', 'warn'); return; }
   showLoading(`一键超额 (${accounts.length} 个)...`);
