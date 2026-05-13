@@ -134,6 +134,41 @@ fn health_check(state: State<AppState>) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
+fn refresh_all(state: State<AppState>) -> Result<String, String> {
+    let conn = state.conn.lock().map_err(|e| e.to_string())?;
+    let accounts = db::list_accounts(&conn).map_err(|e| e.to_string())?;
+    let mut ok_n = 0;
+    let total = accounts.len();
+    for account in &accounts {
+        if account.refresh_token.is_empty() {
+            continue;
+        }
+        match api::do_refresh(account) {
+            Ok((at, rt, exp)) => {
+                let _ = db::update_token(&conn, account.id, &at, &rt, &exp);
+                let profile = if !account.profile_arn.is_empty() {
+                    account.profile_arn.clone()
+                } else {
+                    api::fixed_profile_arn(&account.provider).to_string()
+                };
+                if !profile.is_empty() {
+                    if let Ok(u) = api::query_usage(&at, &profile, false) {
+                        let _ = db::update_usage(
+                            &conn, account.id, u.usage_limit, u.current_usage,
+                            u.overage_cap, u.current_overages,
+                            &u.overage_status, u.overage_charges, &u.subscription,
+                        );
+                    }
+                }
+                ok_n += 1;
+            }
+            Err(_) => {}
+        }
+    }
+    Ok(format!("自动刷新: {ok_n}/{total}"))
+}
+
+#[tauri::command]
 fn delete_accounts(state: State<AppState>, ids: Vec<i64>) -> Result<usize, String> {
     let conn = state.conn.lock().map_err(|e| e.to_string())?;
     let mut count = 0;
@@ -311,6 +346,7 @@ fn main() {
             import_json,
             export_json,
             refresh_accounts,
+            refresh_all,
             health_check,
             delete_accounts,
             inject_to_local,

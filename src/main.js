@@ -265,13 +265,63 @@ function formatSub(raw) {
   return raw || '—';
 }
 
+// ─── 自动刷新 ───────────────────────────────────────────────────────────
+let autoRefreshTimer = null;
+let countdownTimer = null;
+let nextRefreshAt = 0;
+
+function setAutoRefresh() {
+  const mins = parseInt(document.getElementById('refresh-interval').value) || 0;
+  clearInterval(autoRefreshTimer);
+  clearInterval(countdownTimer);
+  autoRefreshTimer = null;
+  countdownTimer = null;
+
+  if (mins <= 0) {
+    document.getElementById('countdown').textContent = '--:--';
+    document.getElementById('refresh-status').textContent = '';
+    nextRefreshAt = 0;
+    return;
+  }
+
+  nextRefreshAt = Date.now() + mins * 60 * 1000;
+  autoRefreshTimer = setInterval(doAutoRefresh, mins * 60 * 1000);
+  countdownTimer = setInterval(updateCountdown, 1000);
+  updateCountdown();
+  document.getElementById('refresh-status').textContent = `每 ${mins} 分钟自动刷新`;
+}
+
+function updateCountdown() {
+  const el = document.getElementById('countdown');
+  if (!nextRefreshAt) { el.textContent = '--:--'; return; }
+  const diff = Math.max(0, nextRefreshAt - Date.now());
+  const m = Math.floor(diff / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (diff <= 0) el.textContent = '刷新中...';
+}
+
+async function doAutoRefresh() {
+  const mins = parseInt(document.getElementById('refresh-interval').value) || 0;
+  nextRefreshAt = Date.now() + mins * 60 * 1000;
+  try {
+    const msg = await invoke('refresh_all');
+    log(msg, 'ok');
+    await loadAccounts();
+    await reloadLocal();
+  } catch (e) {
+    log('自动刷新失败: ' + e, 'err');
+  }
+}
+
 // ─── 暴露全局 ───────────────────────────────────────────────────────────
 Object.assign(window, {
   importLocal, importJson, exportJson, healthCheck,
   refreshOne, injectOne, deleteOne, enableOverageOne, enableOverageAll,
-  reloadLocal, refreshLocalToken, clearLocalToken
+  reloadLocal, refreshLocalToken, clearLocalToken, setAutoRefresh
 });
 
 // ─── 初始化 ─────────────────────────────────────────────────────────────
 loadAccounts();
 reloadLocal();
+setAutoRefresh();
