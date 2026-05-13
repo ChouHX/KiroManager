@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiro Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-screen flex flex-col text-gray-200 text-xs overflow-hidden select-none">
+
+  <!-- 顶部渐变装饰线 -->
+  <div class="top-accent"></div>
+
+  <!-- 顶部工具栏 -->
+  <nav class="flex items-center gap-2 px-4 py-2 border-b border-border" style="background:#0d1018">
+    <span class="text-sm font-semibold text-gray-100 tracking-tight">Kiro Manager</span>
+    <div class="flex-1"></div>
+    <button onclick="importLocal()" class="btn inline-flex items-center gap-1.5"><span id="icon-download"></span> 本地导入</button>
+    <button onclick="importJson()" class="btn inline-flex items-center gap-1.5"><span id="icon-folder"></span> JSON导入</button>
+    <button onclick="exportJson()" class="btn inline-flex items-center gap-1.5"><span id="icon-save"></span> 导出</button>
+    <div class="w-px h-4 bg-border mx-0.5"></div>
+    <button onclick="healthCheck()" class="btn inline-flex items-center gap-1.5"><span id="icon-heart"></span> 全部检查</button>
+    <button onclick="enableOverageAll()" class="btn inline-flex items-center gap-1.5 text-yellow-400"><span id="icon-zap"></span> 一键超额</button>
+  </nav>
+
+  <!-- 主内容区：左侧本地状态 + 右侧账号卡片 -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- 左侧：本地状态 -->
+    <aside class="w-[260px] shrink-0 border-r border-border overflow-y-auto p-3 flex flex-col gap-2" style="background:#0d1018">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">本地 Kiro</span>
+        <div class="flex gap-1">
+          <button onclick="reloadLocal()" class="card-btn p-1" title="刷新"><span class="icon-refresh"></span></button>
+          <button onclick="refreshLocalToken()" class="card-btn p-1" title="刷新Token"><span class="icon-key"></span></button>
+          <button onclick="clearLocalToken()" class="card-btn danger p-1" title="清除"><span class="icon-eraser"></span></button>
+        </div>
+      </div>
+      <div id="local-content">
+        <p class="text-gray-500 text-center py-4 text-[11px]">加载中...</p>
+      </div>
+    </aside>
+
+    <!-- 右侧：账号卡片列表 -->
+    <main id="cards-container" class="flex-1 overflow-y-auto p-4">
+      <div class="text-center text-gray-500 py-16 text-sm">暂无账号，请点击上方按钮导入</div>
+    </main>
+
+  </div>
+
+  <!-- 日志面板 -->
+  <div class="log-panel px-4 py-1.5 max-h-[72px] overflow-y-auto shrink-0">
+    <div class="text-[10px] text-gray-600 mb-0.5 font-medium uppercase tracking-wider">Log</div>
+    <div id="log-list" class="font-mono text-[11px] leading-relaxed space-y-0.5"></div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

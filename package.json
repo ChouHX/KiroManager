@@ -1,0 +1,21 @@
+{
+  "name": "kiro-manager",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "css": "tailwindcss -i src/input.css -o src/style.css --minify",
+    "dev": "tauri dev",
+    "build": "npm run css && tauri build",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "@tauri-apps/cli": "^2",
+    "tailwindcss": "^4.3.0"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "lucide": "^1.14.0",
+    "lucide-static": "^1.14.0"
+  }
+}
