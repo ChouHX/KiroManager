@@ -75,12 +75,6 @@ pub fn list_accounts(conn: &Connection) -> Result<Vec<Account>> {
     })?;
     Ok(rows.filter_map(|x| x.ok()).collect())
 }
-
-pub fn get_account(conn: &Connection, id: i64) -> Result<Option<Account>> {
-    let list = list_accounts(conn)?;
-    Ok(list.into_iter().find(|a| a.id == id))
-}
-
 pub fn upsert(conn: &Connection, a: &Account) -> Result<i64> {
     // 先按 userId, 再按 email 匹配
     let existing: Option<i64> = if !a.user_id.is_empty() {

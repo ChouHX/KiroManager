@@ -26,38 +26,3 @@ pub struct Account {
     pub last_query_time: Option<String>,
 }
 
-impl Account {
-    pub fn usage_str(&self) -> String {
-        format!("{}/{}", self.current_usage, self.usage_limit)
-    }
-
-    pub fn subscription_display(&self) -> String {
-        format_subscription(&self.subscription)
-    }
-}
-
-pub fn format_subscription(raw: &str) -> String {
-    if raw.is_empty() {
-        return "-".into();
-    }
-    let upper = raw.to_uppercase().replace(' ', "_");
-    let table = [
-        ("KIRO_PRO_PLUS", "Pro+"),
-        ("KIRO_PRO", "Pro"),
-        ("KIRO_FREE", "Free"),
-        ("KIRO_POWER", "Power"),
-        ("Q_DEVELOPER_STANDALONE_PRO_PLUS", "Pro+"),
-        ("Q_DEVELOPER_STANDALONE_PRO", "Pro"),
-        ("Q_DEVELOPER_STANDALONE_FREE", "Free"),
-        ("Q_DEVELOPER_STANDALONE_POWER", "Power"),
-        ("Q_DEVELOPER_STANDALONE", "Free"),
-    ];
-    for (k, v) in table {
-        if upper.contains(k) {
-            return v.into();
-        }
-    }
-    if upper.contains("PRO") { "Pro".into() }
-    else if upper.contains("FREE") { "Free".into() }
-    else { raw.to_string() }
-}
