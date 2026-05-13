@@ -154,6 +154,44 @@ body {
   border-top: 1px solid var(--color-border);
 }
 
+/* ─── Toast 通知 ───────────────────────────────────────────────────── */
+.toast {
+  pointer-events: auto;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  max-width: 320px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  animation: toast-in 0.25s ease, toast-out 0.3s ease 3.2s forwards;
+  border: 1px solid;
+}
+.toast-ok { background: #0a2e1a; border-color: #166534; color: #86efac; }
+.toast-err { background: #2e0a0a; border-color: #7f1d1d; color: #fca5a5; }
+.toast-warn { background: #2e1f0a; border-color: #78350f; color: #fcd34d; }
+.toast-info { background: #0a1a2e; border-color: #1e3a5f; color: #93c5fd; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateY(-8px); }
+}
+
+/* ─── Loading Spinner ──────────────────────────────────────────────── */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #2d3548;
+  border-top-color: #4f8ff7;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ─── 本地状态卡片 ─────────────────────────────────────────────────── */
 .local-status-card {
   background: var(--color-card);

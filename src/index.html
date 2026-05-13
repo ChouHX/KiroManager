@@ -23,7 +23,7 @@
     <button onclick="enableOverageAll()" class="btn inline-flex items-center gap-1.5 text-yellow-400"><span id="icon-zap"></span> 一键超额</button>
   </nav>
 
-  <!-- 主内容区：左侧本地状态 + 右侧账号卡片 -->
+  <!-- 主内容区 -->
   <div class="flex flex-1 overflow-hidden">
 
     <!-- 左侧：本地状态 -->
@@ -65,10 +65,15 @@
 
   </div>
 
-  <!-- 日志面板 -->
-  <div class="log-panel px-4 py-1.5 max-h-[72px] overflow-y-auto shrink-0">
-    <div class="text-[10px] text-gray-600 mb-0.5 font-medium uppercase tracking-wider">Log</div>
-    <div id="log-list" class="font-mono text-[11px] leading-relaxed space-y-0.5"></div>
+  <!-- Toast 容器 -->
+  <div id="toast-container" class="fixed top-12 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- 全局 Loading 遮罩 -->
+  <div id="loading-overlay" class="fixed inset-0 z-40 bg-black/40 flex items-center justify-center hidden">
+    <div class="bg-card border border-border rounded-xl px-6 py-4 flex items-center gap-3 shadow-2xl">
+      <div class="spinner"></div>
+      <span id="loading-text" class="text-sm text-gray-200">处理中...</span>
+    </div>
   </div>
 
   <script type="module" src="main.js"></script>

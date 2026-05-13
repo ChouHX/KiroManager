@@ -14,16 +14,23 @@ document.querySelectorAll('.icon-refresh').forEach(el => el.innerHTML = icons.re
 document.querySelectorAll('.icon-key').forEach(el => el.innerHTML = icons.key);
 document.querySelectorAll('.icon-eraser').forEach(el => el.innerHTML = icons.eraser);
 
-// ─── 日志 ───────────────────────────────────────────────────────────────
-function log(msg, level = 'info') {
-  const el = document.getElementById('log-list');
-  const div = document.createElement('div');
-  const colors = { info: 'text-gray-500', ok: 'text-green-400', warn: 'text-yellow-400', err: 'text-red-400' };
-  div.className = colors[level] || 'text-gray-500';
-  div.textContent = msg;
-  el.appendChild(div);
-  el.scrollTop = el.scrollHeight;
-  if (el.children.length > 200) el.removeChild(el.firstChild);
+// ─── Toast 通知 ─────────────────────────────────────────────────────────
+function toast(msg, level = 'info') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast toast-${level}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ─── Loading ────────────────────────────────────────────────────────────
+function showLoading(text = '处理中...') {
+  document.getElementById('loading-text').textContent = text;
+  document.getElementById('loading-overlay').classList.remove('hidden');
+}
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.add('hidden');
 }
 
 // ─── 账号列表 ───────────────────────────────────────────────────────────
@@ -32,7 +39,7 @@ async function loadAccounts() {
     accounts = await invoke('list_accounts');
     renderCards();
   } catch (e) {
-    log('加载账号失败: ' + e, 'err');
+    toast('加载账号失败: ' + e, 'err');
   }
 }
 
@@ -84,63 +91,70 @@ function cardHtml(a) {
 
 // ─── 单卡片操作 ─────────────────────────────────────────────────────────
 async function refreshOne(id) {
-  log('刷新中...', 'info');
+  toast('刷新中...', 'info');
+// ─── 单卡片操作 ─────────────────────────────────────────────────────────
+async function refreshOne(id) {
+  showLoading('刷新中...');
   try {
     const logs = await invoke('refresh_accounts', { ids: [id] });
-    logs.forEach(l => log(l, l.startsWith('✓') ? 'ok' : 'err'));
+    logs.forEach(l => toast(l, l.startsWith('✓') ? 'ok' : 'err'));
     await loadAccounts();
-  } catch (e) { log('刷新失败: ' + e, 'err'); }
+  } catch (e) { toast('刷新失败: ' + e, 'err'); }
+  hideLoading();
 }
 
 async function injectOne(id) {
   try {
     const email = await invoke('inject_to_local', { id });
-    log(`已注入 ${email} 到本地`, 'ok');
+    toast(`已注入 ${email} 到本地`, 'ok');
     await reloadLocal();
-  } catch (e) { log('注入失败: ' + e, 'err'); }
+  } catch (e) { toast('注入失败: ' + e, 'err'); }
 }
 
 async function deleteOne(id) {
   try {
     await invoke('delete_accounts', { ids: [id] });
-    log('已删除', 'warn');
+    toast('已删除', 'warn');
     await loadAccounts();
-  } catch (e) { log('删除失败: ' + e, 'err'); }
+  } catch (e) { toast('删除失败: ' + e, 'err'); }
 }
 
 // ─── 全局操作 ───────────────────────────────────────────────────────────
 async function enableOverageOne(id) {
-  log('启用超额...', 'info');
+  showLoading('启用超额...');
   try {
     const msg = await invoke('enable_overage_for', { id });
-    log(msg, 'ok');
+    toast(msg, 'ok');
     await loadAccounts();
-  } catch (e) { log('启用超额失败: ' + e, 'err'); }
+  } catch (e) { toast('启用超额失败: ' + e, 'err'); }
+  hideLoading();
 }
 
 async function enableOverageAll() {
-  if (accounts.length === 0) { log('无账号', 'warn'); return; }
-  log(`一键启用超额 (${accounts.length} 个)...`, 'info');
+  if (accounts.length === 0) { toast('无账号', 'warn'); return; }
+  showLoading(`一键超额 (${accounts.length} 个)...`);
   let ok = 0;
   for (const a of accounts) {
     try {
       const msg = await invoke('enable_overage_for', { id: a.id });
-      log(msg, 'ok');
+      toast(msg, 'ok');
       ok++;
-    } catch (e) { log(`${a.email}: ${e}`, 'err'); }
+    } catch (e) { toast(`${a.email}: ${e}`, 'err'); }
   }
-  log(`完成: ${ok}/${accounts.length}`, ok === accounts.length ? 'ok' : 'warn');
+  toast(`完成: ${ok}/${accounts.length}`, ok === accounts.length ? 'ok' : 'warn');
   await loadAccounts();
+  hideLoading();
 }
 
 async function importLocal() {
-  log('从本地 Kiro 导入...', 'info');
+  showLoading('从本地导入...');
   try {
     const email = await invoke('import_local');
-    log('已导入: ' + email, 'ok');
+    toast('已导入: ' + email, 'ok');
     await loadAccounts();
     await reloadLocal();
-  } catch (e) { log('导入失败: ' + e, 'err'); }
+  } catch (e) { toast('导入失败: ' + e, 'err'); }
+  hideLoading();
 }
 
 async function importJson() {
@@ -150,12 +164,14 @@ async function importJson() {
   input.onchange = async () => {
     const file = input.files[0];
     if (!file) return;
+    showLoading('导入中...');
     const content = await file.text();
     try {
       const count = await invoke('import_json', { content });
-      log(`成功导入 ${count} 个账号`, 'ok');
+      toast(`成功导入 ${count} 个账号`, 'ok');
       await loadAccounts();
-    } catch (e) { log('导入失败: ' + e, 'err'); }
+    } catch (e) { toast('导入失败: ' + e, 'err'); }
+    hideLoading();
   };
   input.click();
 }
@@ -168,17 +184,18 @@ async function exportJson() {
     const a = document.createElement('a');
     a.href = url; a.download = 'kiro_accounts_export.json'; a.click();
     URL.revokeObjectURL(url);
-    log(`已导出 ${accounts.length} 个账号`, 'ok');
-  } catch (e) { log('导出失败: ' + e, 'err'); }
+    toast(`已导出 ${accounts.length} 个账号`, 'ok');
+  } catch (e) { toast('导出失败: ' + e, 'err'); }
 }
 
 async function healthCheck() {
-  log('开始健康检查...', 'info');
+  showLoading('健康检查中...');
   try {
     const logs = await invoke('health_check');
-    logs.forEach(l => log(l, 'ok'));
+    logs.forEach(l => toast(l, 'ok'));
     await loadAccounts();
-  } catch (e) { log('健康检查失败: ' + e, 'err'); }
+  } catch (e) { toast('健康检查失败: ' + e, 'err'); }
+  hideLoading();
 }
 
 // ─── 本地状态（左侧面板）─────────────────────────────────────────────────
@@ -228,20 +245,21 @@ function localField(label, value) {
 }
 
 async function refreshLocalToken() {
-  log('刷新本地 Token...', 'info');
+  showLoading('刷新本地 Token...');
   try {
     const msg = await invoke('refresh_local_token');
-    log(msg, 'ok');
+    toast(msg, 'ok');
     await reloadLocal();
-  } catch (e) { log('刷新失败: ' + e, 'err'); }
+  } catch (e) { toast('刷新失败: ' + e, 'err'); }
+  hideLoading();
 }
 
 async function clearLocalToken() {
   try {
     await invoke('clear_local_token');
-    log('已清除本地 Token', 'ok');
+    toast('已清除本地 Token', 'ok');
     await reloadLocal();
-  } catch (e) { log('清除失败: ' + e, 'err'); }
+  } catch (e) { toast('清除失败: ' + e, 'err'); }
 }
 
 // ─── 工具函数 ───────────────────────────────────────────────────────────
@@ -306,11 +324,11 @@ async function doAutoRefresh() {
   nextRefreshAt = Date.now() + mins * 60 * 1000;
   try {
     const msg = await invoke('refresh_all');
-    log(msg, 'ok');
+    toast(msg, 'ok');
     await loadAccounts();
     await reloadLocal();
   } catch (e) {
-    log('自动刷新失败: ' + e, 'err');
+    toast('自动刷新失败: ' + e, 'err');
   }
 }
 
